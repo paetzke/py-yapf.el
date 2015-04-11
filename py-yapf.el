@@ -14,7 +14,7 @@
 ;; To automatically apply when saving a python file, use the
 ;; following code:
 
-;;   (add-hook 'before-save-hook 'py-yapf-before-save)
+;;   (add-hook 'python-mode-hook 'py-yapf-enable-on-save)
 
 ;;; Code:
 
@@ -113,15 +113,12 @@ Note that `--in-place' is used by default."
 
 
 ;;;###autoload
-(defun py-yapf-before-save ()
-  "Pre-save hooked to bse used before running py-yapf."
+(defun py-yapf-enable-on-save ()
+  "Pre-save hooked to be used before running py-yapf."
   (interactive)
-  (when (eq major-mode 'python-mode)
-    (condition-case err (py-yapf)
-      (error (message "%s" (error-message-string err))))))
+  (add-hook 'before-save-hook 'py-yapf-buffer nil t))
 
 
 (provide 'py-yapf)
-
 
 ;;; py-yapf.el ends here

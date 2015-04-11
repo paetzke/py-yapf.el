@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+TEST_FILE=/tmp/py-test-file.py
+
 
 install_emacs24() {
     sudo add-apt-repository ppa:cassou/emacs -y
@@ -17,14 +19,30 @@ test_install_package() {
 
 
 test_01() {
+    rm $TEST_FILE || true
     emacs --no-init-file -nw \
+          --load ./tests.el \
           --load py-yapf.el \
           ./tests/01/before.py \
           -f py-yapf-buffer \
-          -f save-buffer \
-          -f save-buffers-kill-terminal
+          -f write-test-file \
+          -f kill-emacs
 
-    diff ./tests/01/before.py ./tests/01/after.py
+    diff $TEST_FILE ./tests/01/after.py
+}
+
+
+test_02() {
+    rm $TEST_FILE || true
+    emacs --no-init-file -nw \
+          --load ./tests.el \
+          --load ./tests/02/init.el \
+          --load py-yapf.el \
+          ./tests/02/before.py \
+          -f write-test-file \
+          -f kill-emacs
+
+    diff $TEST_FILE ./tests/02/after.py
 }
 
 
@@ -35,6 +53,7 @@ main() {
     fi
 
     test_01
+    test_02
 }
 
 
