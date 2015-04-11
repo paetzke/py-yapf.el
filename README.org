@@ -3,7 +3,7 @@
 [[https://travis-ci.org/paetzke/py-yapf.el][https://travis-ci.org/paetzke/py-yapf.el.svg?branch=master]]
 [[http://melpa.org/#/py-yapf][http://melpa.org/packages/py-yapf-badge.svg]]
 
-Provides commands, which use the external "yapf" tool to tidy up the current buffer according to Python's PEP8.
+Provides commands, which use the external =yapf= tool to tidy up the current buffer according to Python's PEP8.
 
 #+BEGIN_SRC bash
 $ pip install git+https://github.com/google/yapf.git
@@ -18,12 +18,12 @@ M-x package-install RET
 py-yapf RET
 #+END_SRC
 
-Add the =before-save-hook= to your =~/.emacs=
+Add the save hook to your =~/.emacs=
 
 #+BEGIN_SRC lisp
 (add-to-list 'load-path "/your/path/")
 (require 'py-yapf)
-(add-hook 'before-save-hook 'py-yapf-before-save)
+(add-hook 'python-mode-hook 'py-yapf-enable-on-save)
 #+END_SRC
 
 Now every time you save your Python file =yapf= will be executed on the current buffer.
