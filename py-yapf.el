@@ -114,7 +114,7 @@ Note that `--in-place' is used by default."
 
 ;;;###autoload
 (defun py-yapf-enable-on-save ()
-  "Pre-save hooked to bse used before running py-yapf."
+  "Pre-save hooked to be used before running py-yapf."
   (interactive)
   (add-hook 'before-save-hook 'py-yapf-buffer nil t))
 
