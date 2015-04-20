@@ -33,40 +33,20 @@ Note that `--in-place' is used by default."
   :type '(repeat (string :tag "option")))
 
 
-(defun py-yapf ()
-  "Formats the current buffer according to the yapf tool."
-  (when (not (executable-find "yapf"))
-    (error "\"yapf\" command not found.  Install yapf with \"pip install yapf\""))
-  (let ((tmpfile (make-temp-file "yapf" nil ".py"))
-        (patchbuf (get-buffer-create "*yapf patch*"))
-        (errbuf (get-buffer-create "*yapf Errors*"))
-        (coding-system-for-read 'utf-8)
-        (coding-system-for-write 'utf-8))
-    (with-current-buffer errbuf
-      (setq buffer-read-only nil)
-      (erase-buffer))
-    (with-current-buffer patchbuf
-      (erase-buffer))
-    (write-region nil nil tmpfile)
-    (if (zerop (apply 'call-process "yapf" nil errbuf nil
-                      (append py-yapf-options `("--in-place" ,tmpfile))))
-        (if (zerop (call-process-region (point-min) (point-max) "diff" nil patchbuf nil "-n" "-" tmpfile))
-            (progn
-              (kill-buffer errbuf)
-              (message "Buffer is already yapfed"))
-          (py-yapf-bf--apply-rcs-patch patchbuf)
-          (kill-buffer errbuf)
-          (message "Applied yapf"))
-      (error "Could not apply yapf. Check *yapf Errors* for details"))
-    (kill-buffer patchbuf)
-    (delete-file tmpfile)))
+(defun py-yapf--call-executable (errbuf file)
+  (zerop (apply 'call-process "yapf" nil errbuf nil
+                (append py-yapf-options `("--in-place", file)))))
+
+
+(defun py-yapf--call ()
+  (py-yapf-bf--apply-executable-to-buffer "yapf" 'py-yapf--call-executable nil))
 
 
 ;;;###autoload
 (defun py-yapf-buffer ()
   "Uses the \"yapf\" tool to reformat the current buffer."
   (interactive)
-  (py-yapf))
+  (py-yapf--call))
 
 
 ;;;###autoload
