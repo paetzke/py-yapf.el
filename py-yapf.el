@@ -18,6 +18,7 @@
 
 ;;; Code:
 
+
 (defgroup py-yapf nil
   "Use yapf to beautify a Python buffer."
   :group 'convenience
@@ -32,26 +33,48 @@ Note that `--in-place' is used by default."
   :type '(repeat (string :tag "option")))
 
 
-(defun py-yapf-apply-rcs-patch (patch-buffer)
+(defun py-yapf--call-executable (errbuf file)
+  (zerop (apply 'call-process "yapf" nil errbuf nil
+                (append py-yapf-options `("--in-place", file)))))
+
+
+(defun py-yapf--call ()
+  (py-yapf-bf--apply-executable-to-buffer "yapf" 'py-yapf--call-executable nil))
+
+
+;;;###autoload
+(defun py-yapf-buffer ()
+  "Uses the \"yapf\" tool to reformat the current buffer."
+  (interactive)
+  (py-yapf--call))
+
+
+;;;###autoload
+(defun py-yapf-enable-on-save ()
+  "Pre-save hooked to be used before running py-yapf."
+  (interactive)
+  (add-hook 'before-save-hook 'py-yapf-buffer nil t))
+
+
+;; BEGIN GENERATED -----------------
+;; !!! This file is generated !!!
+;; buftra.el
+;; Copyright (C) 2015, Friedrich Paetzke <paetzke@fastmail.fm>
+;; Author: Friedrich Paetzke <paetzke@fastmail.fm>
+;; URL: https://github.com/paetzke/buftra.el
+;; Version: 0.3
+
+
+(defun py-yapf-bf--apply-rcs-patch (patch-buffer)
   "Apply an RCS-formatted diff from PATCH-BUFFER to the current buffer."
   (let ((target-buffer (current-buffer))
-        ;; Relative offset between buffer line numbers and line numbers
-        ;; in patch.
-        ;;
-        ;; Line numbers in the patch are based on the source file, so
-        ;; we have to keep an offset when making changes to the
-        ;; buffer.
-        ;;
-        ;; Appending lines decrements the offset (possibly making it
-        ;; negative), deleting lines increments it. This order
-        ;; simplifies the forward-line invocations.
         (line-offset 0))
     (save-excursion
       (with-current-buffer patch-buffer
         (goto-char (point-min))
         (while (not (eobp))
           (unless (looking-at "^\\([ad]\\)\\([0-9]+\\) \\([0-9]+\\)")
-            (error "Invalid rcs patch or internal error in py-yapf-apply-rcs-patch"))
+            (error "invalid rcs patch or internal error in py-yapf-bf--apply-rcs-patch"))
           (forward-line)
           (let ((action (match-string 1))
                 (from (string-to-number (match-string 2)))
@@ -73,52 +96,57 @@ Note that `--in-place' is used by default."
                 (setq line-offset (+ line-offset len))
                 (kill-whole-line len)))
              (t
-              (error "Invalid rcs patch or internal error in py-yapf-apply-rcs-patch")))))))))
+              (error "invalid rcs patch or internal error in py-yapf-bf-apply--rcs-patch")))))))))
 
 
-(defun py-yapf ()
-  "Formats the current buffer according to the yapf tool."
-  (when (not (executable-find "yapf"))
-    (error "\"yapf\" command not found.  Install yapf with \"pip install yapf\""))
-  (let ((tmpfile (make-temp-file "yapf" nil ".py"))
-        (patchbuf (get-buffer-create "*yapf patch*"))
-        (errbuf (get-buffer-create "*yapf Errors*"))
-        (coding-system-for-read 'utf-8)
-        (coding-system-for-write 'utf-8))
+(defun py-yapf-bf--replace-region (filename)
+  (delete-region (region-beginning) (region-end))
+  (insert-file-contents filename))
+
+
+(defun py-yapf-bf--apply-executable-to-buffer (executable-name executable-call only-on-region)
+  "Formats the current buffer according to the executable"
+  (when (not (executable-find executable-name))
+    (error (format "%s command not found." executable-name)))
+  (let ((tmpfile (make-temp-file executable-name nil ".py"))
+        (patchbuf (get-buffer-create (format "*%s patch*" executable-name)))
+        (errbuf (get-buffer-create (format "*%s Errors*" executable-name)))
+        (coding-system-for-read buffer-file-coding-system)
+        (coding-system-for-write buffer-file-coding-system))
     (with-current-buffer errbuf
       (setq buffer-read-only nil)
       (erase-buffer))
     (with-current-buffer patchbuf
       (erase-buffer))
-    (write-region nil nil tmpfile)
-    (if (zerop (apply 'call-process "yapf" nil errbuf nil
-                      (append py-yapf-options `("--in-place" ,tmpfile))))
-        (if (zerop (call-process-region (point-min) (point-max) "diff" nil patchbuf nil "-n" "-" tmpfile))
+
+    (if (and only-on-region (use-region-p))
+        (write-region (region-beginning) (region-end) tmpfile)
+      (write-region nil nil tmpfile))
+
+    (if (funcall executable-call errbuf tmpfile)
+        (if (zerop (call-process-region (point-min) (point-max) "diff" nil
+                                        patchbuf nil "-n" "-" tmpfile))
             (progn
               (kill-buffer errbuf)
-              (message "Buffer is already yapfed"))
-          (py-yapf-apply-rcs-patch patchbuf)
+              (message (format "Buffer is already %sed" executable-name)))
+
+          (if only-on-region
+              (py-yapf-bf--replace-region tmpfile)
+            (py-yapf-bf--apply-rcs-patch patchbuf))
+
           (kill-buffer errbuf)
-          (message "Applied yapf"))
-      (error "Could not apply yapf. Check *yapf Errors* for details"))
+          (message (format "Applied %s" executable-name)))
+      (error (format "Could not apply %s. Check *%s Errors* for details"
+                     executable-name executable-name)))
     (kill-buffer patchbuf)
     (delete-file tmpfile)))
 
 
-;;;###autoload
-(defun py-yapf-buffer ()
-  "Uses the \"yapf\" tool to reformat the current buffer."
-  (interactive)
-  (py-yapf))
-
-
-;;;###autoload
-(defun py-yapf-enable-on-save ()
-  "Pre-save hooked to be used before running py-yapf."
-  (interactive)
-  (add-hook 'before-save-hook 'py-yapf-buffer nil t))
+;; py-yapf-bf.el ends here
+;; END GENERATED -------------------
 
 
 (provide 'py-yapf)
+
 
 ;;; py-yapf.el ends here
