@@ -27,3 +27,22 @@ Add the save hook to your =~/.emacs=
 #+END_SRC
 
 Now every time you save your Python file =yapf= will be executed on the current buffer.
+
+
+** Functions
+
+- =M-x py-yapf-buffer RET=: Uses the =yapf= tool to reformat the current buffer.
+
+
+** Bugs and improvements
+
+Feel free to open tickets or send pull requests with improvements.
+These [[https://github.com/paetzke/py-yapf.el/graphs/contributors][contributors]] have done so.
+
+
+** Copyright
+
+Copyright (c) 2015 Friedrich Pätzke.
+See [[LICENSE]] for further details.
+
+So long. [[https://twitter.com/paetzke][Friedrich]].
