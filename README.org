@@ -6,7 +6,7 @@
 Provides commands, which use the external =yapf= tool to tidy up the current buffer according to Python's PEP8.
 
 #+BEGIN_SRC bash
-$ pip install git+https://github.com/google/yapf.git
+$ pip install yapf
 $ wget https://raw.githubusercontent.com/paetzke/py-yapf.el/master/py-yapf.el \
        -O /your/path/py-yapf.el
 #+END_SRC
