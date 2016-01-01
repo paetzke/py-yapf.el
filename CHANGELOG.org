@@ -1,0 +1,4 @@
+* CHANGELOG
+
+** Next
+- Adjust py-yapf.el to newer versions of yapf.

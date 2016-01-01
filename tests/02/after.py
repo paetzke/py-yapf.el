@@ -12,4 +12,4 @@ class foo(object):
 
 
 def f(a):
-    return 37 + -+a[42 - x:y ** 3]
+    return 37 + -+a[42 - x:y**3]

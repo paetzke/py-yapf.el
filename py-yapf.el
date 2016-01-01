@@ -34,8 +34,8 @@ Note that `--in-place' is used by default."
 
 
 (defun py-yapf--call-executable (errbuf file)
-  (zerop (apply 'call-process "yapf" nil errbuf nil
-                (append py-yapf-options `("--in-place", file)))))
+  (apply 'call-process "yapf" nil errbuf nil
+         (append py-yapf-options `("--in-place", file))))
 
 
 (defun py-yapf--call ()
@@ -126,21 +126,19 @@ Note that `--in-place' is used by default."
         (write-region (region-beginning) (region-end) tmpfile)
       (write-region nil nil tmpfile))
 
-    (if (funcall executable-call errbuf tmpfile)
-        (if (zerop (call-process-region (point-min) (point-max) "diff" nil
-                                        patchbuf nil "-n" "-" tmpfile))
-            (progn
-              (kill-buffer errbuf)
-              (message (format "Buffer is already %sed" executable-name)))
-
-          (if only-on-region
-              (py-yapf-bf--replace-region tmpfile)
-            (py-yapf-bf--apply-rcs-patch patchbuf))
-
+    (funcall executable-call errbuf tmpfile)
+    (if (zerop (call-process-region (point-min) (point-max) "diff" nil
+                                    patchbuf nil "-n" "-" tmpfile))
+        (progn
           (kill-buffer errbuf)
-          (message (format "Applied %s" executable-name)))
-      (error (format "Could not apply %s. Check *%s Errors* for details"
-                     executable-name executable-name)))
+          (message (format "Buffer is already %sed" executable-name)))
+
+      (if only-on-region
+          (py-yapf-bf--replace-region tmpfile)
+        (py-yapf-bf--apply-rcs-patch patchbuf))
+
+      (kill-buffer errbuf)
+      (message (format "Applied %s" executable-name)))
     (kill-buffer patchbuf)
     (delete-file tmpfile)))
 
