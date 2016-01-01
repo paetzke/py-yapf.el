@@ -39,7 +39,7 @@ Note that `--in-place' is used by default."
 
 
 (defun py-yapf--call ()
-  (py-yapf-bf--apply-executable-to-buffer "yapf" 'py-yapf--call-executable nil "py"))
+  (py-yapf-bf--apply-executable-to-buffer "yapf" 'py-yapf--call-executable nil "py" t))
 
 
 ;;;###autoload
@@ -59,10 +59,13 @@ Note that `--in-place' is used by default."
 ;; BEGIN GENERATED -----------------
 ;; !!! This file is generated !!!
 ;; buftra.el
-;; Copyright (C) 2015, Friedrich Paetzke <paetzke@fastmail.fm>
-;; Author: Friedrich Paetzke <paetzke@fastmail.fm>
+;; Copyright (C) 2015-2016, Friedrich Paetzke <f.paetzke@gmail.com>
+;; Author: Friedrich Paetzke <f.paetzke@gmail.com>
 ;; URL: https://github.com/paetzke/buftra.el
-;; Version: 0.4
+;; Version: 0.6
+
+;; This code is initially copied from go-mode.el (copyright the go-mode authors).
+;; See LICENSE or https://raw.githubusercontent.com/dominikh/go-mode.el/master/LICENSE
 
 
 (defun py-yapf-bf--apply-rcs-patch (patch-buffer)
@@ -94,9 +97,10 @@ Note that `--in-place' is used by default."
                 (goto-char (point-min))
                 (forward-line (- from line-offset 1))
                 (setq line-offset (+ line-offset len))
-                (kill-whole-line len)))
+                (kill-whole-line len)
+                (pop kill-ring)))
              (t
-              (error "invalid rcs patch or internal error in py-yapf-bf-apply--rcs-patch")))))))))
+              (error "invalid rcs patch or internal error in py-yapf-bf--apply-rcs-patch")))))))))
 
 
 (defun py-yapf-bf--replace-region (filename)
@@ -107,7 +111,8 @@ Note that `--in-place' is used by default."
 (defun py-yapf-bf--apply-executable-to-buffer (executable-name
                                            executable-call
                                            only-on-region
-                                           file-extension)
+                                           file-extension
+                                           ignore-return-code)
   "Formats the current buffer according to the executable"
   (when (not (executable-find executable-name))
     (error (format "%s command not found." executable-name)))
@@ -126,20 +131,26 @@ Note that `--in-place' is used by default."
         (write-region (region-beginning) (region-end) tmpfile)
       (write-region nil nil tmpfile))
 
-    (funcall executable-call errbuf tmpfile)
-    (if (zerop (call-process-region (point-min) (point-max) "diff" nil
-                                    patchbuf nil "-n" "-" tmpfile))
-        (progn
+    (if (or (funcall executable-call errbuf tmpfile)
+            (ignore-return-code))
+        (if (zerop (call-process-region (point-min) (point-max) "diff" nil
+                                        patchbuf nil "-n" "-" tmpfile))
+            (progn
+              (kill-buffer errbuf)
+              (pop kill-ring)
+              (message (format "Buffer is already %sed" executable-name)))
+
+          (if only-on-region
+              (py-yapf-bf--replace-region tmpfile)
+            (py-yapf-bf--apply-rcs-patch patchbuf))
+
           (kill-buffer errbuf)
-          (message (format "Buffer is already %sed" executable-name)))
-
-      (if only-on-region
-          (py-yapf-bf--replace-region tmpfile)
-        (py-yapf-bf--apply-rcs-patch patchbuf))
-
-      (kill-buffer errbuf)
-      (message (format "Applied %s" executable-name)))
+          (pop kill-ring)
+          (message (format "Applied %s" executable-name)))
+      (error (format "Could not apply %s. Check *%s Errors* for details"
+                     executable-name executable-name)))
     (kill-buffer patchbuf)
+    (pop kill-ring)
     (delete-file tmpfile)))
 
 
