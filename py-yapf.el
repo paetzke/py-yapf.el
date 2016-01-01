@@ -1,10 +1,10 @@
 ;;; py-yapf.el --- Use yapf to beautify a Python buffer
 
-;; Copyright (C) 2015, Friedrich Paetzke <paetzke@fastmail.fm>
+;; Copyright (C) 2015-2016, Friedrich Paetzke <f.paetzke@gmail.com>
 
-;; Author: Friedrich Paetzke <paetzke@fastmail.fm>
+;; Author: Friedrich Paetzke <f.paetzke@gmail.com>
 ;; URL: https://github.com/paetzke/py-yapf.el
-;; Version: 0.2
+;; Version: 0.3
 
 ;;; Commentary:
 
