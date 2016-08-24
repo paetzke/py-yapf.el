@@ -116,7 +116,10 @@ Note that `--in-place' is used by default."
   "Formats the current buffer according to the executable"
   (when (not (executable-find executable-name))
     (error (format "%s command not found." executable-name)))
-  (let ((tmpfile (make-temp-file executable-name nil (concat "." file-extension)))
+  ;; Make sure tempfile is an absolute path in the current directory so that
+  ;; YAPF can use its standard mechanisms to find the project's .style.yapf
+  (let ((tmpfile (make-temp-file (concat default-directory executable-name)
+                                 nil (concat "." file-extension)))
         (patchbuf (get-buffer-create (format "*%s patch*" executable-name)))
         (errbuf (get-buffer-create (format "*%s Errors*" executable-name)))
         (coding-system-for-read buffer-file-coding-system)
