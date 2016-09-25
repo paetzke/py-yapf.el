@@ -4,7 +4,7 @@
 
 ;; Author: Friedrich Paetzke <f.paetzke@gmail.com>
 ;; URL: https://github.com/paetzke/py-yapf.el
-;; Version: 0.3
+;; Version: 2016.1
 
 ;;; Commentary:
 
