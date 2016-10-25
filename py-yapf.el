@@ -135,7 +135,7 @@ Note that `--in-place' is used by default."
       (write-region nil nil tmpfile))
 
     (if (or (funcall executable-call errbuf tmpfile)
-            (ignore-return-code))
+            ignore-return-code)
         (if (zerop (call-process-region (point-min) (point-max) "diff" nil
                                         patchbuf nil "-n" "-" tmpfile))
             (progn
