@@ -48,6 +48,17 @@ Note that `--in-place' is used by default."
   (interactive)
   (py-yapf--call))
 
+;;;###autoload
+(defun py-yapf-region()
+  "format selection"
+  (interactive)
+  (call-process "yapf" nil "bar" nil
+  		"--in-place"
+  		buffer-file-name
+  		"-l"
+		(format "%d-%d"
+			(1+ (count-lines 1 (region-beginning)))
+			(1+ (count-lines 1 (region-end))))))
 
 ;;;###autoload
 (defun py-yapf-enable-on-save ()
