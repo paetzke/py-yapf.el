@@ -33,13 +33,19 @@ Note that `--in-place' is used by default."
   :type '(repeat (string :tag "option")))
 
 
+(defcustom py-yapf-command  "yapf"
+  "Name of yapf command to execute."
+  :group 'py-yapf
+  :type '(string))
+
+
 (defun py-yapf--call-executable (errbuf file)
-  (apply 'call-process "yapf" nil errbuf nil
+  (apply 'call-process py-yapf-command nil errbuf nil
          (append py-yapf-options `("--in-place", file))))
 
 
 (defun py-yapf--call ()
-  (py-yapf-bf--apply-executable-to-buffer "yapf" 'py-yapf--call-executable nil "py" t))
+  (py-yapf-bf--apply-executable-to-buffer py-yapf-command 'py-yapf--call-executable nil "py" t))
 
 
 ;;;###autoload
