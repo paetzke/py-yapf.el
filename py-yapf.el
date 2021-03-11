@@ -25,6 +25,14 @@
   :prefix "py-yapf-")
 
 
+(defcustom py-yapf-executable "yapf"
+  "Name of \"yapf\" executable.
+
+Note that specifying a full path is not supported."
+  :group 'py-yapf
+  :type 'string)
+
+
 (defcustom py-yapf-options nil
   "Options used for yapf.
 
@@ -34,12 +42,12 @@ Note that `--in-place' is used by default."
 
 
 (defun py-yapf--call-executable (errbuf file)
-  (apply 'call-process "yapf" nil errbuf nil
+  (apply 'call-process py-yapf-executable nil errbuf nil
          (append py-yapf-options `("--in-place", file))))
 
 
 (defun py-yapf--call ()
-  (py-yapf-bf--apply-executable-to-buffer "yapf" 'py-yapf--call-executable nil "py" t))
+  (py-yapf-bf--apply-executable-to-buffer py-yapf-executable 'py-yapf--call-executable nil "py" t))
 
 
 ;;;###autoload
@@ -141,7 +149,7 @@ Note that `--in-place' is used by default."
             (progn
               (kill-buffer errbuf)
               (pop kill-ring)
-              (message (format "Buffer is already %sed" executable-name)))
+              (message (format "Buffer needs no processing by \"%s\"." executable-name)))
 
           (if only-on-region
               (py-yapf-bf--replace-region tmpfile)
