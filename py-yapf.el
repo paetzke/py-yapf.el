@@ -149,7 +149,7 @@ Note that `--in-place' is used by default."
             (progn
               (kill-buffer errbuf)
               (pop kill-ring)
-              (message (format "Buffer needs no processing by \"%s\"." executable-name)))
+              (message (format "Buffer needs no processing by %s." executable-name)))
 
           (if only-on-region
               (py-yapf-bf--replace-region tmpfile)
