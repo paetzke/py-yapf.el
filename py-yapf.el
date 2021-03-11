@@ -52,7 +52,7 @@ Note that `--in-place' is used by default."
 
 ;;;###autoload
 (defun py-yapf-buffer ()
-  "Uses the \"yapf\" tool to reformat the current buffer."
+  "Use the \"yapf\" tool to reformat the current buffer."
   (interactive)
   (py-yapf--call))
 
@@ -85,7 +85,7 @@ Note that `--in-place' is used by default."
         (goto-char (point-min))
         (while (not (eobp))
           (unless (looking-at "^\\([ad]\\)\\([0-9]+\\) \\([0-9]+\\)")
-            (error "invalid rcs patch or internal error in py-yapf-bf--apply-rcs-patch"))
+            (error "Invalid rcs patch or internal error in py-yapf-bf--apply-rcs-patch"))
           (forward-line)
           (let ((action (match-string 1))
                 (from (string-to-number (match-string 2)))
@@ -108,7 +108,7 @@ Note that `--in-place' is used by default."
                 (kill-whole-line len)
                 (pop kill-ring)))
              (t
-              (error "invalid rcs patch or internal error in py-yapf-bf--apply-rcs-patch")))))))))
+              (error "Invalid rcs patch or internal error in py-yapf-bf--apply-rcs-patch")))))))))
 
 
 (defun py-yapf-bf--replace-region (filename)
@@ -121,7 +121,7 @@ Note that `--in-place' is used by default."
                                            only-on-region
                                            file-extension
                                            ignore-return-code)
-  "Formats the current buffer according to the executable"
+  "Formats the current buffer according to the executable."
   (when (not (executable-find executable-name))
     (error (format "%s command not found." executable-name)))
   ;; Make sure tempfile is an absolute path in the current directory so that
